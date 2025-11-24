@@ -6,7 +6,6 @@
 
 # Local environment configs
 /local.properties
-/gradle.properties
 
 # IDE
 /.idea/

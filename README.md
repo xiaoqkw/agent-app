@@ -14,11 +14,11 @@ Lightweight agent app that labels visible UI elements with numeric IDs (overlay)
 - Worker thread drains callbacks on destroy and waits briefly to avoid use-after-destroy of overlay/server.
 
 ## Build
-1. JDK 17 required. 本仓库已在 `gradle.properties` 配置 `org.gradle.java.home=/home/qianyi/qiankunwei/jdk-17.0.17+10`，若路径变动请同步修改。
+1. JDK 17 required. 将 `JAVA_HOME` 指向 JDK 17，或在 `gradle.properties` 设置 `org.gradle.java.home=/absolute/path/to/jdk-17`。
 2. 使用自带 Gradle Wrapper（无需系统 gradle）：
    ```bash
    cd agent-app
-   ./gradlew :app:assembleDebug
+   JAVA_HOME=/home/qianyi/qiankunwei/jdk-17.0.17+10 ./gradlew :app:assembleDebug
    ```
    首次构建会自动下载 Android Build-Tools 34.0.0 等依赖（需网络）。
    APK 输出：`app/build/outputs/apk/debug/app-debug.apk`.
@@ -29,9 +29,12 @@ adb install -r app/build/outputs/apk/debug/app-debug.apk
 # open Accessibility settings to enable the service manually (Android 15 blocks silent enable without device owner/root)
 adb shell am start -a android.settings.ACCESSIBILITY_SETTINGS
 
-# optional: start service with custom port/token
-adb shell am startservice -n com.example.agent/.AgentAccessibilityService --ei PORT 9000 --es TOKEN secret123
+# service auto-starts after enabling accessibility; default HTTP port is 9000
 adb forward tcp:9000 tcp:9000
+
+# optional: change token (and/or port) at runtime
+adb shell am startservice -n com.example.agent/.AgentAccessibilityService --es TOKEN secret123 --ei PORT 9100
+adb forward tcp:9100 tcp:9100
 ```
 
 ## HTTP endpoints (all on forwarded port)

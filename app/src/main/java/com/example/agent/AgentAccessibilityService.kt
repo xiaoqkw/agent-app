@@ -31,6 +31,7 @@ class AgentAccessibilityService : AccessibilityService(), AgentWebServer.LabelPr
     private var handlerThread: HandlerThread? = null
     private var worker: Handler? = null
     private var activePort: Int? = null
+    private var activeToken: String? = null
 
     private var serverPort = DEFAULT_PORT
     private var token: String? = null
@@ -44,7 +45,6 @@ class AgentAccessibilityService : AccessibilityService(), AgentWebServer.LabelPr
         }
         setupOverlay()
         startHttpServer()
-        startForegroundSafe()
         scheduleRefresh()
         Log.i(TAG, "Service connected, listening on $serverPort")
     }
@@ -120,9 +120,14 @@ class AgentAccessibilityService : AccessibilityService(), AgentWebServer.LabelPr
             WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY,
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
                 WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE or
-                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
+                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
+                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
             android.graphics.PixelFormat.TRANSLUCENT
         )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            lp.layoutInDisplayCutoutMode =
+                WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
+        }
         windowManager?.addView(overlay, lp)
         overlayView = overlay
     }
@@ -148,6 +153,7 @@ class AgentAccessibilityService : AccessibilityService(), AgentWebServer.LabelPr
             try {
                 it.start(NanoHTTPD.SOCKET_READ_TIMEOUT, false)
                 activePort = serverPort
+                activeToken = token
             } catch (e: IOException) {
                 Log.e(TAG, "Server start failed on $serverPort", e)
                 throw e
@@ -156,7 +162,7 @@ class AgentAccessibilityService : AccessibilityService(), AgentWebServer.LabelPr
     }
 
     private fun restartServerIfNeeded() {
-        if (activePort != serverPort) {
+        if (activePort != serverPort || activeToken != token) {
             startHttpServer()
         }
     }
@@ -193,6 +199,6 @@ class AgentAccessibilityService : AccessibilityService(), AgentWebServer.LabelPr
         private const val TAG = "AgentService"
         const val EXTRA_PORT = "PORT"
         const val EXTRA_TOKEN = "TOKEN"
-        private const val DEFAULT_PORT = 8080
+        private const val DEFAULT_PORT = 9000
     }
 }
