@@ -1,0 +1,20 @@
+# Android/Gradle build outputs
+/build/
+/.gradle/
+/app/build/
+/app/intermediates/
+
+# Local environment configs
+/local.properties
+/gradle.properties
+
+# IDE
+/.idea/
+*.iml
+
+# Artifacts / misc
+*.apk
+*.aab
+captures/
+*.log
+.DS_Store
