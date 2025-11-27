@@ -17,10 +17,12 @@ class LabelManager(
     private var nextId = 1
 
     @Synchronized
-    fun buildLabels(root: AccessibilityNodeInfo?): List<UiLabel> {
-        if (root == null) return emptyList()
+    fun buildLabels(roots: List<AccessibilityNodeInfo>): List<UiLabel> {
+        if (roots.isEmpty()) return emptyList()
         val collected = ArrayList<RawNode>(maxNodes)
-        traverse(root, 0, collected)
+        for (root in roots) {
+            traverse(root, 0, collected)
+        }
 
         // Sort smaller & deeper nodes first so overlaps prefer precise targets.
         val sorted = collected

@@ -104,12 +104,12 @@ class AgentAccessibilityService : AccessibilityService(), AgentWebServer.LabelPr
     }
 
     private fun refreshLabels() {
-        val root: AccessibilityNodeInfo = rootInActiveWindow ?: return
-        // LabelManager traverses and recycles every node (including root).
-        val newLabels = labelManager.buildLabels(root)
+        val roots = windows.mapNotNull { it.root }
+        if (roots.isEmpty()) return
+        val newLabels = labelManager.buildLabels(roots)
         labelsRef.set(newLabels)
         overlayView?.update(newLabels)
-        Log.d(TAG, "refresh: ${newLabels.size} labels")
+        Log.d(TAG, "refresh: ${newLabels.size} labels from ${roots.size} windows")
     }
 
     private fun setupOverlay() {
